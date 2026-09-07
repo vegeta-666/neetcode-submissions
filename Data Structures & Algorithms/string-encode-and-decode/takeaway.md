@@ -58,5 +58,64 @@ for s in strs:
 final_str = "".join(res_list)
 ```
 
-## Test
-test 2
+## 2. 雙指標命名與核心心法 (Two Pointers)
+演算法的最佳解常出現 `i`, `j`，但實務或面試中，使用**具備語意的命名**更能展現工程師的軟體美學。雙指標主要分為兩大派系：
+
+### 派系 A：快慢指標 / 探路指標 (本題核心 💡)
+*   **慢指標 (`slow` / `lag`)**：定在原地，通常代表「當前處理區段的起點」。
+*   **快指標 (`fast` / `lead`)**：負責往前衝、探路、尋找特定終止條件（如這題要找 `#` 號）。
+*   🎯 **解碼 (Decode) 核心心法**：
+    > **「用快指標找到關鍵字元，算出長度後，直接用 Slicing 把整段字串吃掉，然後把慢指標瞬移過去。」**
+
+### 派系 B：左右邊界指標 (區間型題目)
+*   **左指標 (`left` / `l`)**：區間的左端點。
+*   **右指標 (`right` / `r`)**：區間的右端點。
+*   **常見場景**：二分搜尋法（Binary Search）、滑動視窗（Sliding Window）、回文字串檢查。
+
+---
+
+## 3. 手工指標 vs 內建 `.find()` 抉擇
+在面試中，使用 `s.find()` **絕對不是作弊**，反而能展現 Production-Ready 的實務思維，因為內建函式底層是 C 語言優化，效能更好。
+
+但若想追求「不產生額外子字串」的完美空間複雜度，**純手工雙指標**是極致的寫法。
+
+### 🏆 兩種 Decode 解法對比
+
+#### 作法一：使用內建 `.find()` (簡潔、高效)
+```python
+def decode(self, s: str) -> List[str]:
+    res = []
+    slow = 0
+    while slow < len(s):
+        # 尋找 slow 之後的第一個 '#'
+        fast = s.find('#', slow)
+        length = int(s[slow:fast])
+        
+        # 根據長度切片文字，並將 slow 瞬移到下一段起點
+        word_start = fast + 1
+        word_end = word_start + length
+        res.append(s[word_start:word_end])
+        slow = word_end
+    return res
+```
+
+#### 作法二：純手工 `while` 雙指標 (極致空間複雜度，不切片探路)
+```python
+def decode(self, s: str) -> List[str]:
+    res = []
+    slow = 0
+    while slow < len(s):
+        fast = slow
+        # 純手工指標往前探路，直到撞到 '#'
+        while s[fast] != '#':
+            fast += 1
+            
+        length = int(s[slow:fast])
+        word_start = fast + 1
+        word_end = word_start + length
+        res.append(s[word_start:word_end])
+        
+        # 慢指標瞬移
+        slow = word_end
+    return res
+```
